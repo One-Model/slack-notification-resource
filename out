@@ -24,6 +24,8 @@ then
 fi
 
 webhook_url="$(jq -r '.source.url' < "${payload}")"
+token="$(jq -r '.source.token // "null"' < "${payload}")"
+
 allow_insecure="$(jq -r '.source.insecure // "false"' < "${payload}")"
 raw_ca_certs=$(jq -r '.source.ca_certs // []' < $payload)
 
@@ -91,7 +93,7 @@ debug_info=""
 metadata=""
 body=""
 
-
+CURL_OPTION="${CURL_OPTION} -H \"Content-Type: application/json\""
 if [[ "$allow_insecure" == "true" ]]
 then
     CURL_OPTION="${CURL_OPTION} -k"
@@ -105,6 +107,11 @@ fi
 if [[ "$proxy_https_tunnel" == "true" ]]
 then
     CURL_OPTION="${CURL_OPTION} --proxytunnel"
+fi
+
+if [[ "$token" != "null" ]]
+then
+    CURL_OPTION="${CURL_OPTION} -H \"Authorization: Bearer ${token}\""
 fi
 
 if [[ "$always_notify" == "true" || -n "$TEXT_FILE_CONTENT" || -z "$text_file" ]]
