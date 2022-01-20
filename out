@@ -93,25 +93,25 @@ debug_info=""
 metadata=""
 body=""
 
-CURL_OPTION="${CURL_OPTION} -H \"Content-Type: application/json\""
+CURL_OPTION=("-H" "Content-Type: application/json")
 if [[ "$allow_insecure" == "true" ]]
 then
-    CURL_OPTION="${CURL_OPTION} -k"
+    CURL_OPTION+=("-k")
 fi
 
 if [[ "$proxy" != "null" ]]
 then
-    CURL_OPTION="${CURL_OPTION} --proxy ${proxy}"
+    CURL_OPTION+=("--proxy" "${proxy}")
 fi
 
 if [[ "$proxy_https_tunnel" == "true" ]]
 then
-    CURL_OPTION="${CURL_OPTION} --proxytunnel"
+    CURL_OPTION+=("--proxytunnel")
 fi
 
 if [[ "$token" != "null" ]]
 then
-    CURL_OPTION="${CURL_OPTION} -H \"Authorization: Bearer ${token}\""
+    CURL_OPTION+=("-H" "Authorization: Bearer ${token}")
 fi
 
 if [[ "$always_notify" == "true" || -n "$TEXT_FILE_CONTENT" || -z "$text_file" ]]
@@ -170,13 +170,13 @@ EOF
   elif [[ "$silent" == "true" ]]
   then
     echo "Using silent output"
-    curl -s -X POST -T /tmp/compact_body.json ${CURL_OPTION} "${webhook_url}"
+    curl -s -X POST -T /tmp/compact_body.json "${CURL_OPTION[@]}" "${webhook_url}"
   elif [[ ${redact_hook} == "true" ]]
   then
     url_path="$(echo ${webhook_url} | sed -e "s/https\{0,1\}:\/\/[^\/]*\(\/[^?&#]*\).*/\1/")"
-    curl -v -X POST -T /tmp/compact_body.json ${CURL_OPTION} "${webhook_url}" 2>&1 | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
+    curl -v -X POST -T /tmp/compact_body.json "${CURL_OPTION[@]}" "${webhook_url}" 2>&1 | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
   else
-    curl -v -X POST -T /tmp/compact_body.json ${CURL_OPTION} "${webhook_url}" | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
+    curl -v -X POST -T /tmp/compact_body.json "${CURL_OPTION[@]}" "${webhook_url}" | sed -e "s#${url_path}#***WEBHOOK URL REDACTED***#g"
   fi
 else
   text_interplated="$(echo "" | jq -R -s .)"
